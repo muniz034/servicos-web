@@ -20,7 +20,7 @@ import { Resultado } from "./Resultado.js";
 
 // Todos os parâmetros acima mencionados são obrigatórios para a consulta.
 
-const parametros = new Parametros(3304557, { anoInicio: 2020, anoFim: 2020, semanaInicio: 1, semanaFim: 40 });
+const parametros = new Parametros(3304557, "dengue", { anoInicio: 2010, anoFim: 2010, semanaInicio: 1, semanaFim: 53 });
 
 const url = "https://info.dengue.mat.br/api/alertcity?" + parametros.toSearchParams();
 
