@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<title>Resultados</title>
+</head>
+
+<body>
+    <main>
+        <header>
+            <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Análise de dados da dengue</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Estados</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    Regiões
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Norte</a></li>
+                                    <li><a class="dropdown-item" href="#">Nordeste</a></li>
+                                    <li><a class="dropdown-item" href="#">Centro-Oeste</a></li>
+                                    <li><a class="dropdown-item" href="#">Sul</a></li>
+                                    <li><a class="dropdown-item" href="#">Suldeste</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <form class="d-flex" role="search">
+                            <input class="form-control me-2" type="search" placeholder="Procurar cidade"
+                                aria-label="Search">
+                            <button class="btn btn-outline-success" type="submit">Buscar</button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="container py-4">
+            <div class="modal fade" id="exampleModal" tabindex="1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title"><strong>Erro!</strong></div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                Cidade não encontrada
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="jumbotron p-5 mb-4 rounded-3 bg-body-tertiary">
+                <div>
+                    <h1 class="display-4">Rio de Janeiro</h1>
+                    <div class="pt-2">
+                        <canvas id="linePlot" class="my-3 w-100"></canvas>
+                    </div>
+                    <!--
+                        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to
+                            featured content or information.</p>
+              -->
+                    <hr class="my-3">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <th scope="col">Data</th>
+                                <th scope="col">Casos Estimados</th>
+                                <th scope="col">Casos Confirmados</th>
+                                <th scope="col">População</th>
+                                <th scope="col">Umidade</th>
+                                <th scope="col">Temperatura média</th>
+                            </thead>
+                            <tr class="">
+                                <td>dd/MM/YYYY</td>
+                                <td>X</td>
+                                <td>Y</td>
+                                <td>Z</td>
+                                <td>W</td>
+                                <td>T</td>
+                            </tr>
+                            <tr class="">
+                                <td>dd/MM/YYYY</td>
+                                <td>X</td>
+                                <td>Y</td>
+                                <td>Z</td>
+                                <td>W</td>
+                                <td>T</td>
+                            </tr>
+                            <tr class="">
+                                <td>dd/MM/YYYY</td>
+                                <td>X</td>
+                                <td>Y</td>
+                                <td>Z</td>
+                                <td>W</td>
+                                <td>T</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <p class="lead pt-2">
+                        <!---<a class="btn btn-primary btn-lg btn-outline-dark" href="#" role="button">Saiba mais</a> !--->
+                        <button class="btn btn-lg btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal">Saiba mais</button>
+
+                    </p>
+                </div>
+            </div>
+            <footer class="pt-3 mt-4 text-body-secondary border-top">
+                © 2024
+            </footer>
+        </div>
+    </main>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
+
+<script>
+    const ctx = document.getElementById('linePlot').getContext("2d");
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Casos',
+                data: [{
+                    x: '2021-11-06 23:39:30',
+                    y: 50
+                }, {
+                    x: '2021-11-07 01:00:28',
+                    y: 60
+                }, {
+                    x: '2021-12-15 09:00:28',
+                    y: 20
+                }],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'timeseries',
+                },
+                y: {
+                    suggestedMin : 0
+                }
+            }
+        },
+    });
+</script>
+
+</html>
