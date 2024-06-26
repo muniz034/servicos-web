@@ -17,13 +17,13 @@ async function getSE(ano) {
     return await res.json();
 }
 
-async function searchByMunicipio({geocode, anoInicio, anoFim, semanaInicio, semanaFim, doenca}) {
-    const res = await fetch(`http://localhost:8080/municipios/${geocode}?anoInicio=${anoInicio}&anoFim=${anoFim}&semanaInicio=${semanaInicio}&semanaFim=${semanaFim}&doenca=${doenca}`);
+async function searchByEstado({ estadoID, anoInicio, anoFim, semanaInicio, semanaFim, doenca }) {
+    const res = await fetch(`http://localhost:8080/estado/${estadoID}?anoInicio=${anoInicio}&anoFim=${anoFim}&semanaInicio=${semanaInicio}&semanaFim=${semanaFim}&doenca=${doenca}`);
     return await res.json();
 }
 
 function translateNivel(val) {
-    switch(val) {
+    switch (Math.ceil(val)) {
         case 1:
             return '<span class="badge bg-success">Verde</span>';
         case 2:
@@ -38,7 +38,7 @@ function translateNivel(val) {
 }
 
 function translateReceptivo(val) {
-    switch(val) {
+    switch (Math.ceil(val)) {
         case 0:
             return "Desfavorável";
         case 1:
@@ -75,12 +75,11 @@ const pesquisarButton = document.getElementById('button-pesquisar');
 
 const grafico = document.getElementById('linePlot').getContext("2d");
 
-
 const clearButton = document.getElementById('button-limpar');
 
-window.onload = async() => {
+window.onload = async () => {
     const estados = await getEstados();
-    for(const estado of estados) estadosSelect.appendChild(new Option(estado.nome, estado.id, false, false));
+    for (const estado of estados) estadosSelect.appendChild(new Option(estado.nome, estado.id, false, false));
 }
 
 window.onbeforeunload = clear;
@@ -88,14 +87,14 @@ window.onbeforeunload = clear;
 clearButton.addEventListener('click', clear);
 
 pesquisarButton.addEventListener('click', async function (e) {
-    const geocode = municipiosSelect.value;
     const anoInicio = seAnoInicioSelect.value;
     const anoFim = seAnoFimSelect.value;
     const semanaInicio = seInicioSelect.value;
     const semanaFim = seFimSelect.value;
+    const estadoID = estadosSelect.value;
     const doenca = document.querySelector(".form-check-input:checked").value;
 
-    const municipio = await searchByMunicipio({ geocode, anoInicio, anoFim, semanaInicio, semanaFim, doenca });
+    const estado = await searchByEstado({ estadoID, anoInicio, anoFim, semanaInicio, semanaFim, doenca });
 
     const resultadoTBody = document.getElementById('tbody-resultado');
     const sumario = document.getElementById('sumario-pesquisa');
@@ -103,7 +102,7 @@ pesquisarButton.addEventListener('click', async function (e) {
 
     let resultHTML = "";
 
-    for(const resultado of municipio.resultados) {
+    for (const resultado of estado.resultados) {
         resultHTML += "<tr>";
         resultHTML += `<th scope="row">${new Date(resultado.data_iniSE).toLocaleDateString("pt-BR")}</th>`;
         resultHTML += `<td>${resultado.casos}</td>`;
@@ -112,14 +111,14 @@ pesquisarButton.addEventListener('click', async function (e) {
         resultHTML += "</tr>";
     }
 
-    const inicio = new Date(municipio.resultados[0].data_iniSE).toLocaleDateString("pt-BR");
-    const fim = new Date(municipio.resultados[municipio.resultados.length - 1].data_iniSE).toLocaleDateString("pt-BR");
+    const inicio = new Date(estado.resultados[0].data_iniSE).toLocaleDateString("pt-BR");
+    const fim = new Date(estado.resultados[estado.resultados.length - 1].data_iniSE).toLocaleDateString("pt-BR");
 
     resultadoTBody.innerHTML = resultHTML;
-    sumario.innerText = `Casos de ${capitalizeFirstLetter(doenca)} em ${municipio.nome} de ${fim} à ${inicio}`;
-    sumarioGrafico.innerText = `Casos de ${capitalizeFirstLetter(doenca)} em ${municipio.nome} de ${fim} à ${inicio}`;
+    sumario.innerText = `Casos de ${capitalizeFirstLetter(doenca)} em ${estado.nome} de ${fim} à ${inicio}`;
+    sumarioGrafico.innerText = `Casos de ${capitalizeFirstLetter(doenca)} em ${estado.nome} de ${fim} à ${inicio}`;
 
-    const data = municipio.resultados
+    const data = estado.resultados
         .sort((a, b) => {
             return new Date(a.data_iniSE) - new Date(b.data_iniSE);
         })
@@ -127,11 +126,11 @@ pesquisarButton.addEventListener('click', async function (e) {
             return { x: new Date(resultado.data_iniSE).toLocaleDateString("pt-BR"), y: resultado.casos };
         });
 
-    if(actualChart){
+    if (actualChart) {
         actualChart.clear();
         actualChart.destroy();
     }
-    
+
     actualChart = new Chart(grafico, {
         type: 'line',
         data: {
@@ -146,44 +145,31 @@ pesquisarButton.addEventListener('click', async function (e) {
     document.getElementById("div-tabela").style.removeProperty("display");
 });
 
-estadosSelect.addEventListener('change', async function (e) {
-    const estadoSelecionado = e.target.value;
-
-    if(estadoSelecionado == -1) return municipiosSelect.disabled = true;
-
-    const municipios = await getMunicipios(estadoSelecionado);
-
-    municipiosSelect.innerHTML = "<option selected>Selecione...</option>";
-
-    for(const municipio of municipios) municipiosSelect.appendChild(new Option(municipio.nome, municipio.geocode, false, false));
-    
-    municipiosSelect.disabled = false;
-});
 
 seAnoInicioSelect.addEventListener('change', async function (e) {
     const anoSelecionado = e.target.value;
 
-    if(anoSelecionado == -1) return seInicioSelect.disabled = true;
+    if (anoSelecionado == -1) return seInicioSelect.disabled = true;
 
     const se = await getSE(anoSelecionado);
 
     seInicioSelect.innerHTML = "<option selected>Selecione...</option>";
 
-    for(const semana of se) seInicioSelect.appendChild(new Option(`${semana.semana} - ${new Date(semana.inicio).toLocaleDateString("pt-BR")} à ${new Date(semana.fim).toLocaleDateString("pt-BR")}`, semana.semana, false, false));
-    
+    for (const semana of se) seInicioSelect.appendChild(new Option(`${semana.semana} - ${new Date(semana.inicio).toLocaleDateString("pt-BR")} à ${new Date(semana.fim).toLocaleDateString("pt-BR")}`, semana.semana, false, false));
+
     seInicioSelect.disabled = false;
 });
 
 seAnoFimSelect.addEventListener('change', async function (e) {
     const anoSelecionado = e.target.value;
 
-    if(anoSelecionado == -1) return seFimSelect.disabled = true;
+    if (anoSelecionado == -1) return seFimSelect.disabled = true;
 
     const se = await getSE(anoSelecionado);
 
     seFimSelect.innerHTML = "<option selected>Selecione...</option>";
 
-    for(const semana of se) seFimSelect.appendChild(new Option(`${semana.semana} - ${new Date(semana.inicio).toLocaleDateString("pt-BR")} à ${new Date(semana.fim).toLocaleDateString("pt-BR")}`, semana.semana, false, false));
-    
+    for (const semana of se) seFimSelect.appendChild(new Option(`${semana.semana} - ${new Date(semana.inicio).toLocaleDateString("pt-BR")} à ${new Date(semana.fim).toLocaleDateString("pt-BR")}`, semana.semana, false, false));
+
     seFimSelect.disabled = false;
 });
